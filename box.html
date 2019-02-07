@@ -1,0 +1,188 @@
+<html>
+    <head>
+<style>
+    /* Perspective */
+    .wrapper {
+        margin-top: 400px;
+        /* Browser/vendor specific -prefixes- are used to increase supported browser list - can also use a javascript polyfill */
+        -webkit-perspective: 800px;
+           -moz-perspective: 800px;
+                perspective: 800px;
+    }
+    /* Base box shape and orientation */
+    .box {
+        position: relative;
+        margin: auto;
+        width: 200px;
+        height: 200px;
+        -webkit-transform: rotateX(45deg) rotateZ(45deg);
+           -moz-transform: rotateX(45deg) rotateZ(45deg);
+                transform: rotateX(45deg) rotateZ(45deg);
+    }
+    /* Standard animation timings and force 3d preserve */
+    .box, .box * {
+        -webkit-transform-style: preserve-3d;
+           -moz-transform-style: preserve-3d;
+                transform-style: preserve-3d;
+        -webkit-transition: all 0.4s ease-in-out;
+           -moz-transition: all 0.4s ease-in-out;
+             -o-transition: all 0.4s ease-in-out;
+                transition: all 0.4s ease-in-out;
+        -webkit-box-sizing: border-box;
+           -moz-box-sizing: border-box;
+                box-sizing: border-box;
+    }
+    /* Standard box side and flap dimensions - Set the width and height on the divs themselves in order to change the shape. */
+    .box .side, .box .flap {
+        width: 200px;
+        height: 200px;
+        border: 3px solid orange;
+        background: rgba(0,0,0,0.1); /* Mostly transparent black */
+        background: rgba(255,255,255,0.8); /* Mostly opaque white */
+    }
+    /* Left fold - move item to the left of the box and fold it along the x-axis */
+    .box .left {
+        position: absolute;
+        top: 0;
+        right: 100%;
+        border-right: 0 none transparent; /* Remove right border to prevent double-ups. */
+        -webkit-transform: rotateY(90deg);
+           -moz-transform: rotateY(90deg);
+                transform: rotateY(90deg);
+        -webkit-transform-origin: right;
+           -moz-transform-origin: right;
+            -ms-transform-origin: right;
+             -o-transform-origin: right;
+                transform-origin: right;
+    }
+    /* Right fold */
+    .box .right {
+        position: absolute;
+        top: 0;
+        left: 100%;
+        border-left: 0 none transparent;
+        -webkit-transform: rotateY(-90deg);
+           -moz-transform: rotateY(-90deg);
+                transform: rotateY(-90deg);
+        -webkit-transform-origin: left;
+           -moz-transform-origin: left;
+            -ms-transform-origin: left;
+             -o-transform-origin: left;
+                transform-origin: left;
+    }
+    /* Top fold */
+    .box .top {
+        position: absolute;
+        left: 0;
+        bottom: 100%;
+        border-bottom: 0 none transparent;
+        -webkit-transform: rotateX(-90deg);
+           -moz-transform: rotateX(-90deg);
+                transform: rotateX(-90deg);
+        -webkit-transform-origin: bottom;
+           -moz-transform-origin: bottom;
+            -ms-transform-origin: bottom;
+             -o-transform-origin: bottom;
+                transform-origin: bottom;
+    }
+    /* bottom fold */
+    .box .bottom {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        border-top: 0 none transparent;
+        -webkit-transform: rotateX(90deg);
+           -moz-transform: rotateX(90deg);
+                transform: rotateX(90deg);
+        -webkit-transform-origin: top;
+           -moz-transform-origin: top;
+            -ms-transform-origin: top;
+             -o-transform-origin: top;
+                transform-origin: top;
+    }
+    /* Specific to left flap - change the dimensions, add a border radius and move it inside the box area. */
+    .box .left.flap {
+        width: 50px; /* Left and right flaps should typically have the same height as their parent side. */
+        -webkit-border-radius: 20px 0 0 20px;
+           -moz-border-radius: 20px 0 0 20px;
+                border-radius: 20px 0 0 20px;
+        -webkit-transform: rotateY(90deg) translateZ(1px);
+           -moz-transform: rotateY(90deg) translateZ(1px);
+                transform: rotateY(90deg) translateZ(1px);
+    }
+    /* Specific to right flap */
+    .box .right.flap {
+        width: 50px;
+        -webkit-border-radius: 0 20px 20px 0;
+           -moz-border-radius: 0 20px 20px 0;
+                border-radius: 0 20px 20px 0;
+        -webkit-transform: rotateY(-90deg) translateZ(1px);
+           -moz-transform: rotateY(-90deg) translateZ(1px);
+                transform: rotateY(-90deg) translateZ(1px);
+    }
+    /* Specific to top flap */
+    .box .top.flap {
+        height: 50px;
+        -webkit-border-radius: 20px 20px 0 0;
+           -moz-border-radius: 20px 20px 0 0;
+                border-radius: 20px 20px 0 0;
+        -webkit-transform: rotateX(-90deg) translateZ(1px);
+           -moz-transform: rotateX(-90deg) translateZ(1px);
+                transform: rotateX(-90deg) translateZ(1px);
+    }
+    /* Specific to bottom flap */
+    .box .bottom.flap {
+        height: 50px;
+        -webkit-border-radius: 0 0 20px 20px;
+           -moz-border-radius: 0 0 20px 20px;
+                border-radius: 0 0 20px 20px;
+        -webkit-transform: rotateX(90deg) translateZ(1px);
+           -moz-transform: rotateX(90deg) translateZ(1px);
+                transform: rotateX(90deg) translateZ(1px);
+    }
+    /* Reset rotations and translations when displaying an open / flat box */
+    .box.open, .box.open * {
+        -webkit-transform: rotateX(0) rotateY(0) translateZ(0) ! important;
+           -moz-transform: rotateX(0) rotateY(0) translateZ(0) ! important;
+                transform: rotateX(0) rotateY(0) translateZ(0) ! important;
+    }
+    /* Add a transition delay to the flaps when opening and delay all other faces when closing. */
+    .box.open .flap, .box:not(.open) *:not(.flap) {
+        -webkit-transition-delay: 0.1s;
+           -moz-transition-delay: 0.1s;
+             -o-transition-delay: 0.1s;
+                transition-delay: 0.1s;
+    }
+</style>
+    </head>
+    <body>
+        <div class="wrapper">
+<div class="box" onclick="if(this.classList.length===2)this.classList='box';else this.classList='open box';// Add or Remove 'open' class on click.">
+	<div class="side"></div>
+	<div class="top">
+		<div class="side"></div>
+		<div class="top flap"></div>
+	</div>
+	<div class="left">
+		<div class="side"></div>
+		<div class="top flap">
+		</div>
+		<div class="left">
+			<div class="left flap"></div>
+			<div class="side"></div>
+		</div>
+		<div class="bottom flap"></div>
+	</div>
+	<div class="bottom">
+		<div class="bottom flap"></div>
+		<div class="side"></div>
+	</div>
+	<div class="right">
+		<div class="bottom flap"></div>
+		<div class="side"></div>
+		<div class="top flap"></div>
+	</div>
+</div>
+        </div>
+    </body>
+</html>

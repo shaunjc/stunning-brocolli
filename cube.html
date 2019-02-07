@@ -1,0 +1,163 @@
+<html>
+    <head>
+        <style>
+            .grid {
+                margin: 0 auto;
+                width: 1080px;
+                padding: 0 20px;
+                max-width: 100%;
+            }
+            .wrap {
+                display: none;
+                perspective: 800px;
+                perspective-origin: 50% 100px;
+            }
+            .cube {
+                position: relative;
+                width: 200px;
+                height: 200px;
+                transform-style: preserve-3d;
+                margin: 100px auto;
+                transform: rotateY(49deg) rotateX(-20deg) rotateZ(-20deg);
+                transition: all 1s ease-in-out;
+            }
+            .cube > div {
+                position: absolute;
+                width: 200px;
+                height: 200px;
+                border: 0px solid #003b63;
+                box-sizing: border-box;
+                box-shadow: inset 0px 0px 0px 11px white;
+                transition: all 1s ease-in-out;
+            }
+            .cube > div > span {
+                display: none;
+            }
+            .back {
+                transform: translateX(0px);
+                transform: translateZ(-100px) rotateY(180deg);
+                background: #003b63;
+            }
+            .right {
+                transform: translateX(-100px) scaleX(0.00000001);
+                transform: rotateY(-270deg) translateX(100px);
+                transform-origin: top right;
+                background: white;
+            }
+            .left {
+                transform: translateX(100px) scaleX(0.00000001);
+                transform: rotateY(270deg) translateX(-100px);
+                transform-origin: center left;
+                background: #faa61a;
+            }
+            .top {
+                transform: translateY(-100px) scaleY(0.00000001);
+                transform: rotateX(-90deg) translateY(-100px);
+                transform-origin: top center;
+                background: #003b63;
+            }
+            .bottom {
+                transform: translateY(100px) scaleY(0.00000001);
+                transform: rotateX(90deg) translateY(100px);
+                transform-origin: bottom center;
+                background: #003b63;
+            }
+            .front {
+                transform: translateX(0px);
+                transform: translateZ(100px);
+            }
+            .cube.flat { /* move to left (orange) / front (transparent) edge - pan up/down */
+                transform: rotateY(45deg) rotateX(0) rotateZ(0);
+            }
+            .cube.flat-1 { /* move to left (orange) face */
+                transform: rotateY(90deg) rotateX(0) rotateZ(0);
+            }
+            .cube.flat-2 { /* move to top (blue) face */
+                transform: rotateY(0) rotateX(-90deg) rotateZ(0);
+            }
+            .cube .left {
+                border-left-width: 10px;
+                border-bottom-width: 10px;
+            }
+            .cube .top,
+            .cube .front {
+                border-right-width: 10px;
+                border-bottom-width: 10px;
+            }
+            .cube.flat .front,
+            .cube.flat .left {
+                border-top-width: 8px;
+                border-bottom-width: 8px;
+            }
+            .cube.flat-1 .left {
+                border-width: 8px;
+            }
+            .cube.flat-2 .top {
+                border-width: 8px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="grid">
+            <div class="wrap">
+                <!-- Perspective wrapper -->
+            </div>
+            <div class="cube" id="cube">
+                <div class="front" id="front">
+                    <span>front</span>
+                </div>
+                <div class="back">
+                    <span>back</span>
+                </div>
+                <div class="top" id="top">
+                    <span>top</span>
+                </div>
+                <div class="bottom">
+                    <span>bottom</span>
+                </div>
+                <div class="left" id="left">
+                    <span>left</span>
+                </div>
+                <div class="right">
+                    <span>right</span>
+                </div>
+            </div>
+            <script defer>
+                (function(){
+                var classes = ['cube', 'cube flat', 'cube flat-1', 'cube flat-2'],
+                    cube = document.getElementById('cube'),
+                    current = 'cube',
+                    randomClass = function() {
+                        var newClass = current;
+                        while ( newClass === current ) {
+                            newClass = classes[Math.floor(Math.random()*classes.length)];
+                        }
+                        cube.classList = current = newClass;
+                    },
+                    interval = setInterval(randomClass, 1000);
+                    document.getElementById('left').addEventListener('click', function(){
+                        clearInterval(interval);
+                        cube.classList = cube.classList.toString() === 'cube flat-1' ? 'cube' : 'cube flat-1';
+                        interval = setTimeout(function(){
+                            interval = setInterval(randomClass, 1000);
+                        }, 4000);
+                    }),
+                    document.getElementById('top').addEventListener('click', function(){
+                        clearInterval(interval);
+                        cube.classList = cube.classList.toString() === 'cube flat-2' ? 'cube' : 'cube flat-2';
+                        interval = setTimeout(function(){
+                            interval = setInterval(randomClass, 1000);
+                        }, 4000);
+                    }),
+                    document.getElementById('front').addEventListener('click', function(){
+                        clearInterval(interval);
+                        cube.classList = cube.classList.toString() === 'cube flat' ? 'cube' : 'cube flat';
+                        interval = setTimeout(function(){
+                            interval = setInterval(randomClass, 1000);
+                        }, 4000);
+                    });
+                })();
+            </script>
+        </div>
+    </body>
+</html>
