@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="css/box.css" />
+    </head>
+    <body>
+        <div class="perspective">
+<div class="box-die" onclick="if(this.classList.length===2)this.classList='box-die';else this.classList='open box-die';// Add or Remove 'open' class on click.">
+	<div class="side"></div>
+	<div class="fold-up">
+		<div class="side"></div>
+		<div class="fold-up flap"></div>
+	</div>
+	<div class="fold-left">
+		<div class="side"></div>
+		<div class="fold-up flap">
+		</div>
+		<div class="fold-left">
+			<div class="side"></div>
+			<div class="fold-left flap"></div>
+		</div>
+		<div class="fold-down flap"></div>
+	</div>
+	<div class="fold-down">
+		<div class="side"></div>
+		<div class="fold-down flap"></div>
+	</div>
+	<div class="fold-right">
+		<div class="side"></div>
+		<div class="fold-up flap"></div>
+		<div class="fold-down flap"></div>
+	</div>
+</div>
+        </div>
+    </body>
+</html>
+

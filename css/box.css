@@ -1,0 +1,176 @@
+/**
+ * Mixin for creating a 3D box shape using css.
+ * 
+ * - .box-die should be the base element and have exactly one .side element.
+ * - The .box-die element can also appear within a .perspective wrapper element.
+ * - The .box-die can have up to one of each of the four .*-fold elements.
+ * - Each .*-fold element should also have the class .flap, or it should contain
+ * exactly one .side element and at most one of each .*-fold element.
+ * - Each .flap element should also be one of the .*-fold elements.
+ * - .flap and .side elements should not have any children with these classes.
+ * - .fold-left should not contain a .fold-right child and visa versa. The same
+ * is also true for .fold-up and .fold-down. Direct descendents will be hidden.
+ * - It is expected that the box will be at most four *.-fold elements deep, not
+ * including the flaps, and that it will contain only one or two small branches.
+ * This is so that the box dimensions will be automatically calculated per side.
+ */
+.perspective {
+  margin: 400px;
+  perspective: 800px; }
+
+.box-die {
+  position: relative;
+  margin: auto;
+  width: 100px;
+  height: 200px;
+  transform: rotateX(45deg) rotateZ(45deg); }
+  .box-die,
+  .box-die * {
+    transform-style: preserve-3d;
+    transition: all 0.4s ease-in-out;
+    box-sizing: border-box; }
+  .box-die .side,
+  .box-die .flap {
+    width: 100px;
+    height: 200px;
+    border: 3px solid orange;
+    background: rgba(255, 255, 255, 0.8); }
+  .box-die .fold-left,
+  .box-die .fold-right,
+  .box-die .fold-up,
+  .box-die .fold-down {
+    position: absolute; }
+  .box-die .fold-left {
+    top: 0;
+    right: 100%;
+    border-right-width: 0px;
+    transform: rotateY(90deg);
+    transform-origin: right; }
+    .box-die .fold-left > .side {
+      border-right-width: 0px; }
+    .box-die .fold-left > .fold-right {
+      display: none; }
+    .box-die .fold-left.flap {
+      width: 25px;
+      border-radius: 12.5px 0 0 12.5px;
+      transform: rotateY(90deg) translateZ(1px); }
+  .box-die .fold-right {
+    top: 0;
+    left: 100%;
+    border-left-width: 0px;
+    transform: rotateY(-90deg);
+    transform-origin: left; }
+    .box-die .fold-right > .side {
+      border-left-width: 0px; }
+    .box-die .fold-right > .fold-left {
+      display: none; }
+    .box-die .fold-right.flap {
+      width: 25px;
+      border-radius: 0 12.5px 12.5px 0;
+      transform: rotateY(-90deg) translateZ(1px); }
+  .box-die .fold-up {
+    left: 0;
+    bottom: 100%;
+    border-bottom-width: 0px;
+    transform: rotateX(-90deg);
+    transform-origin: bottom; }
+    .box-die .fold-up > .side {
+      border-bottom-width: 0px; }
+    .box-die .fold-up > .fold-down {
+      display: none; }
+    .box-die .fold-up.flap {
+      height: 50px;
+      border-radius: 25px 25px 0 0;
+      transform: rotateX(-90deg) translateZ(1px); }
+  .box-die .fold-down {
+    left: 0;
+    top: 100%;
+    border-top-width: 0px;
+    transform: rotateX(90deg);
+    transform-origin: top; }
+    .box-die .fold-down > .side {
+      border-top-width: 0px; }
+    .box-die .fold-down > .fold-up {
+      display: none; }
+    .box-die .fold-down.flap {
+      height: 50px;
+      border-radius: 0 0 25px 25px;
+      transform: rotateX(90deg) translateZ(1px); }
+  .box-die > .fold-up > .side,
+  .box-die > .fold-up > .fold-up > .fold-up > .side,
+  .box-die > .fold-up > .fold-down > .fold-down > .side,
+  .box-die > .fold-down > .side,
+  .box-die > .fold-down > .fold-up > .fold-up > .side,
+  .box-die > .fold-down > .fold-down > .fold-down > .side {
+    width: 100px;
+    height: 300px; }
+  .box-die > .fold-up > .fold-left > .side,
+  .box-die > .fold-up > .fold-right > .side,
+  .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .side,
+  .box-die > .fold-up > .fold-up > .fold-up > .fold-right > .side,
+  .box-die > .fold-up > .fold-down > .fold-down > .fold-left > .side,
+  .box-die > .fold-up > .fold-down > .fold-down > .fold-right > .side,
+  .box-die > .fold-down > .fold-left > .side,
+  .box-die > .fold-down > .fold-right > .side,
+  .box-die > .fold-down > .fold-up > .fold-up > .fold-left > .side,
+  .box-die > .fold-down > .fold-up > .fold-up > .fold-right > .side,
+  .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .side,
+  .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .side {
+    width: 200px;
+    height: 300px; }
+  .box-die > .fold-up > .fold-left.flap,
+  .box-die > .fold-up > .fold-right.flap,
+  .box-die > .fold-up > .fold-up > .fold-up > .fold-left.flap,
+  .box-die > .fold-up > .fold-up > .fold-up > .fold-right.flap,
+  .box-die > .fold-up > .fold-down > .fold-down > .fold-left.flap,
+  .box-die > .fold-up > .fold-down > .fold-down > .fold-right.flap,
+  .box-die > .fold-down > .fold-left.flap,
+  .box-die > .fold-down > .fold-right.flap,
+  .box-die > .fold-down > .fold-up > .fold-up > .fold-left.flap,
+  .box-die > .fold-down > .fold-up > .fold-up > .fold-right.flap,
+  .box-die > .fold-down > .fold-down > .fold-down > .fold-left.flap,
+  .box-die > .fold-down > .fold-down > .fold-down > .fold-right.flap {
+    width: 50px;
+    height: 300px; }
+  .box-die > .fold-left > .side,
+  .box-die > .fold-left > .fold-left > .fold-left > .side,
+  .box-die > .fold-left > .fold-right > .fold-right > .side,
+  .box-die > .fold-right > .side,
+  .box-die > .fold-right > .fold-left > .fold-left > .side,
+  .box-die > .fold-right > .fold-right > .fold-right > .side {
+    width: 300px;
+    height: 200px; }
+  .box-die > .fold-left > .fold-up > .side,
+  .box-die > .fold-left > .fold-down > .side,
+  .box-die > .fold-left > .fold-left > .fold-left > .fold-up > .side,
+  .box-die > .fold-left > .fold-left > .fold-left > .fold-down > .side,
+  .box-die > .fold-left > .fold-right > .fold-right > .fold-up > .side,
+  .box-die > .fold-left > .fold-right > .fold-right > .fold-down > .side,
+  .box-die > .fold-right > .fold-up > .side,
+  .box-die > .fold-right > .fold-down > .side,
+  .box-die > .fold-right > .fold-left > .fold-left > .fold-up > .side,
+  .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .side,
+  .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .side,
+  .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .side {
+    width: 300px;
+    height: 100px; }
+  .box-die > .fold-left > .fold-up.flap,
+  .box-die > .fold-left > .fold-down.flap,
+  .box-die > .fold-left > .fold-left > .fold-left > .fold-up.flap,
+  .box-die > .fold-left > .fold-left > .fold-left > .fold-down.flap,
+  .box-die > .fold-left > .fold-right > .fold-right > .fold-up.flap,
+  .box-die > .fold-left > .fold-right > .fold-right > .fold-down.flap,
+  .box-die > .fold-right > .fold-up.flap,
+  .box-die > .fold-right > .fold-down.flap,
+  .box-die > .fold-right > .fold-left > .fold-left > .fold-up.flap,
+  .box-die > .fold-right > .fold-left > .fold-left > .fold-down.flap,
+  .box-die > .fold-right > .fold-right > .fold-right > .fold-up.flap,
+  .box-die > .fold-right > .fold-right > .fold-right > .fold-down.flap {
+    width: 300px;
+    height: 25px; }
+  .box-die.open, .box-die.open * {
+    transform: rotateX(0) rotateY(0) translateZ(0) !important; }
+  .box-die.open .flap, .box-die:not(.open) *:not(.flap) {
+    transition-delay: 0.1s; }
+
+/*# sourceMappingURL=box.css.map */
