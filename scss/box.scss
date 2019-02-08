@@ -2,6 +2,7 @@
  * Mixin for creating a 3D box shape using css.
  * 
  * - .box-die should be the base element and have exactly one .side element.
+ * - The .box-die element can be given the class .open to flatten the image.
  * - The .box-die element can also appear within a .perspective wrapper element.
  * - The .box-die can have up to one of each of the four .*-fold elements.
  * - Each .*-fold element should also have the class .flap, or it should contain
@@ -52,13 +53,8 @@
         .fold-left {
             top: 0;
             right: 100%;
-            border-right-width: 0px;
             transform: rotateY(90deg);
             transform-origin: right;
-            > .side {
-                // Remove folded border to prevent double-ups when open.
-                border-right-width: 0px;
-            }
             > .fold-right {
                 display: none;
             }
@@ -71,12 +67,8 @@
         .fold-right {
             top: 0;
             left: 100%;
-            border-left-width: 0px;
             transform: rotateY(-90deg);
             transform-origin: left;
-            > .side {
-                border-left-width: 0px;
-            }
             > .fold-left {
                 display: none;
             }
@@ -89,12 +81,8 @@
         .fold-up {
             left: 0;
             bottom: 100%;
-            border-bottom-width: 0px;
             transform: rotateX(-90deg);
             transform-origin: bottom;
-            > .side {
-                border-bottom-width: 0px;
-            }
             > .fold-down {
                 display: none;
             }
@@ -107,12 +95,8 @@
         .fold-down {
             left: 0;
             top: 100%;
-            border-top-width: 0px;
             transform: rotateX(90deg);
             transform-origin: top;
-            > .side {
-                border-top-width: 0px;
-            }
             > .fold-up {
                 display: none;
             }
@@ -171,6 +155,27 @@
             &, * {
                 // Reset rotations and translations when displaying an open / flat box
                 transform: rotateX(0) rotateY(0) translateZ(0) ! important;
+            }
+            // Remove folded border to prevent double-ups when open.
+            .fold-left {
+                &, > .side {
+                    border-right-width: 0px;
+                }
+            }
+            .fold-right {
+                &, > .side {
+                    border-left-width: 0px;
+                }
+            }
+            .fold-up {
+                &, > .side {
+                    border-bottom-width: 0px;
+                }
+            }
+            .fold-down {
+                &, > .side {
+                    border-top-width: 0px;
+                }
             }
         }
         &.open .flap,
