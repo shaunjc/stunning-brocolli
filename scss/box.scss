@@ -8,102 +8,53 @@
  * - Each .*-fold element should also have the class .flap, or it should contain
  * exactly one .side element and at most one of each .*-fold element.
  * - Each .flap element should also be one of the .*-fold elements.
- * - .flap and .side elements should not have any children with these classes.
+ * - .flap and .side elements should not have any children with the box classes.
  * - .fold-left should not contain a .fold-right child and visa versa. The same
  * is also true for .fold-up and .fold-down. Direct descendents will be hidden.
  * - It is expected that the box will be at most four *.-fold elements deep, not
  * including the flaps, and that it will contain only one or two small branches.
  * This is so that the box dimensions will be automatically calculated per side.
  */
-@mixin box-die($box-width: 200px, $box-height: 200px, $box-depth: 200px, $egde-color: orange, $side-color: rgba(255,255,255,0.8), $perspective: 800px) {
+@mixin box-die($box-width: 200px, $box-height: $box-width, $box-depth: $box-width, $egde-color: orange, $side-color: rgba(255,255,255,0.8), $perspective: $box-height * 4) {
     // Perspective
     .perspective {
         margin: $perspective / 2;
         perspective: $perspective;
     }
     .box-die {
-        // Base box shape and orientation
-        position: relative;
-        margin: auto;
         width: $box-width;
         height: $box-height;
-        transform: rotateX(45deg) rotateZ(45deg);
-        &,
-        * {
-            // Standard animation timings and force 3d preserve */
-            transform-style: preserve-3d;
-            transition: all 0.4s ease-in-out;
-            box-sizing: border-box;
-        }
         .side,
         .flap {
             // Standard box side and flap dimensions
             // Set the width and height on the divs themselves in order to change the shape.
             width: $box-width;
             height: $box-height;
-            border: 3px solid $egde-color;
+            border-color: $egde-color;
             background: $side-color
         }
-        .fold-left,
-        .fold-right,
-        .fold-up,
-        .fold-down {
-            position: absolute;
-        }
         .fold-left {
-            top: 0;
-            right: 100%;
-            transform: rotateY(90deg);
-            transform-origin: right;
-            > .fold-right {
-                display: none;
-            }
             &.flap {
                 width: $box-width / 4;
                 border-radius: ($box-width / 8) 0 0 ($box-width / 8);
-                transform: rotateY(90deg) translateZ(1px);
             }
         }
         .fold-right {
-            top: 0;
-            left: 100%;
-            transform: rotateY(-90deg);
-            transform-origin: left;
-            > .fold-left {
-                display: none;
-            }
             &.flap {
                 width: $box-width / 4;
                 border-radius: 0 ($box-width / 8) ($box-width / 8) 0;
-                transform: rotateY(-90deg) translateZ(1px);
             }
         }
         .fold-up {
-            left: 0;
-            bottom: 100%;
-            transform: rotateX(-90deg);
-            transform-origin: bottom;
-            > .fold-down {
-                display: none;
-            }
             &.flap {
                 height: $box-height / 4;
                 border-radius: ($box-height / 8) ($box-height / 8) 0 0;
-                transform: rotateX(-90deg) translateZ(1px);
             }
         }
         .fold-down {
-            left: 0;
-            top: 100%;
-            transform: rotateX(90deg);
-            transform-origin: top;
-            > .fold-up {
-                display: none;
-            }
             &.flap {
                 height: $box-height / 4;
                 border-radius: 0 0 ($box-height / 8) ($box-height / 8);
-                transform: rotateX(90deg) translateZ(1px);
             }
         }
         // Nested sides and flaps will need different dimensions based on their orientation.
@@ -125,6 +76,17 @@
                     &.flap {
                         width: $box-height / 4;
                         height: $box-depth;
+                    }
+                    > .fold-up,
+                    > .fold-down {
+                        > .side {
+                            width: $box-height;
+                            height: $box-width;
+                        }
+                        &.flap {
+                            width: $box-height;
+                            height: $box-width / 4;
+                        }
                     }
                 }
             }
@@ -148,41 +110,128 @@
                         width: $box-depth;
                         height: $box-width / 4;
                     }
+                    > .fold-left,
+                    > .fold-right {
+                        > .side {
+                            width: $box-height;
+                            height: $box-width;
+                        }
+                        &.flap {
+                            width: $box-height / 4;
+                            height: $box-width;
+                        }
+                    }
                 }
             }
         }
-        &.open {
-            &, * {
-                // Reset rotations and translations when displaying an open / flat box
-                transform: rotateX(0) rotateY(0) translateZ(0) ! important;
-            }
-            // Remove folded border to prevent double-ups when open.
-            .fold-left {
-                &, > .side {
-                    border-right-width: 0px;
-                }
-            }
-            .fold-right {
-                &, > .side {
-                    border-left-width: 0px;
-                }
-            }
-            .fold-up {
-                &, > .side {
-                    border-bottom-width: 0px;
-                }
-            }
-            .fold-down {
-                &, > .side {
-                    border-top-width: 0px;
-                }
+    }
+}
+
+// Orientation. Should be the same for all mixins.
+.box-die {
+    // Base box shape and orientation
+    position: relative;
+    margin: auto;
+    transform: rotateX(45deg) rotateZ(45deg);
+    &,
+    * {
+        // Standard animation timings and force 3d preserve */
+        transform-style: preserve-3d;
+        transition: all 0.4s ease-in-out;
+        box-sizing: border-box;
+    }
+    .side,
+    .flap {
+        // Standard box side and flap dimensions
+        // Set the width and height on the divs themselves in order to change the shape.
+        border-width: 3px;
+        border-style: solid;
+    }
+    .fold-left,
+    .fold-right,
+    .fold-up,
+    .fold-down {
+        position: absolute;
+    }
+    .fold-left {
+        top: 0;
+        right: 100%;
+        transform: rotateY(90deg);
+        transform-origin: right;
+        > .fold-right {
+            display: none;
+        }
+        &.flap {
+            transform: rotateY(90deg) translateZ(1px);
+        }
+    }
+    .fold-right {
+        top: 0;
+        left: 100%;
+        transform: rotateY(-90deg);
+        transform-origin: left;
+        > .fold-left {
+            display: none;
+        }
+        &.flap {
+            transform: rotateY(-90deg) translateZ(1px);
+        }
+    }
+    .fold-up {
+        left: 0;
+        bottom: 100%;
+        transform: rotateX(-90deg);
+        transform-origin: bottom;
+        > .fold-down {
+            display: none;
+        }
+        &.flap {
+            transform: rotateX(-90deg) translateZ(1px);
+        }
+    }
+    .fold-down {
+        left: 0;
+        top: 100%;
+        transform: rotateX(90deg);
+        transform-origin: top;
+        > .fold-up {
+            display: none;
+        }
+        &.flap {
+            transform: rotateX(90deg) translateZ(1px);
+        }
+    }
+    &.open {
+        &, * {
+            // Reset rotations and translations when displaying an open / flat box
+            transform: rotateX(0) rotateY(0) translateZ(0) ! important;
+        }
+        // Remove folded border to prevent double-ups when open.
+        .fold-left {
+            &, > .side {
+                border-right-width: 0px;
             }
         }
-        &.open .flap,
-        &:not(.open) *:not(.flap) {
-            // Transition delay to the flaps when opening and delay all other faces when closing.
-            transition-delay: 0.1s;
+        .fold-right {
+            &, > .side {
+                border-left-width: 0px;
+            }
         }
+        .fold-up {
+            &, > .side {
+                border-bottom-width: 0px;
+            }
+        }
+        .fold-down {
+            &, > .side {
+                border-top-width: 0px;
+            }
+        }
+    }
+    &.open .flap,
+    &:not(.open) *:not(.flap) {
+        // Transition delay to the flaps when opening and delay all other faces when closing.
+        transition-delay: 0.1s;
     }
 }
 
