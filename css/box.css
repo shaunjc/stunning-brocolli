@@ -1,19 +1,25 @@
 /**
- * Mixin for creating a 3D box shape using css.
+ * Styles and mixin for creating a 3D box shape using css.
  * 
  * - .box-die should be the base element and have exactly one .side element.
  * - The .box-die element can be given the class .open to flatten the image.
  * - The .box-die element can also appear within a .perspective wrapper element.
- * - The .box-die can have up to one of each of the four .*-fold elements.
- * - Each .*-fold element should also have the class .flap, or it should contain
- * exactly one .side element and at most one of each .*-fold element.
- * - Each .flap element should also be one of the .*-fold elements.
- * - .flap and .side elements should not have any children with the box classes.
+ * - The .box-die can have up to one of each of the four .fold-* elements.
+ * - Each .fold-* element should also have the class .flap, or it should contain
+ * exactly one .side element and at most one of each .fold-* element.
+ * - Each .flap element should also be one of the .fold-* elements.
+ * - .flap and .side element should not have any children with the box classes.
  * - .fold-left should not contain a .fold-right child and visa versa. The same
  * is also true for .fold-up and .fold-down. Direct descendents will be hidden.
- * - It is expected that the box will be at most four *.-fold elements deep, not
+ * - It is expected that the box will be at most four .fold-* elements deep, not
  * including the flaps, and that it will contain only one or two small branches.
  * This is so that the box dimensions will be automatically calculated per side.
+ * - There should not be any overlap when created correctly, however, put .flap
+ * elements further down in the hierarchy to prevent issues with overlap.
+ */
+/**
+ * Mixin: box-die
+ * Automatically calculate the sizes necessary for the sides to fit together.
  */
 .box-die {
   position: relative;
@@ -26,8 +32,12 @@
     box-sizing: border-box; }
   .box-die .side,
   .box-die .flap {
-    border-width: 3px;
-    border-style: solid; }
+    border-style: solid;
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat; }
+  .box-die .inside .side {
+    transform: translateZ(1px); }
   .box-die .fold-left,
   .box-die .fold-right,
   .box-die .fold-up,
@@ -38,83 +48,105 @@
     right: 100%;
     transform: rotateY(90deg);
     transform-origin: right; }
-    .box-die .fold-left > .fold-right {
-      display: none; }
+    .box-die .fold-left.flap,
+    .box-die .fold-left .side {
+      background-position: right center; }
     .box-die .fold-left.flap {
       transform: rotateY(90deg) translateZ(1px); }
+    .box-die .fold-left > .fold-right,
+    .box-die .fold-left ~ .fold-left.flap {
+      display: none; }
   .box-die .fold-right {
     top: 0;
     left: 100%;
     transform: rotateY(-90deg);
     transform-origin: left; }
-    .box-die .fold-right > .fold-left {
-      display: none; }
+    .box-die .fold-right.flap,
+    .box-die .fold-right .side {
+      background-position: left center; }
     .box-die .fold-right.flap {
       transform: rotateY(-90deg) translateZ(1px); }
+    .box-die .fold-right > .fold-left,
+    .box-die .fold-right ~ .fold-right.flap {
+      display: none; }
   .box-die .fold-up {
     left: 0;
     bottom: 100%;
     transform: rotateX(-90deg);
     transform-origin: bottom; }
-    .box-die .fold-up > .fold-down {
-      display: none; }
+    .box-die .fold-up.flap,
+    .box-die .fold-up .side {
+      background-position: bottom center; }
     .box-die .fold-up.flap {
       transform: rotateX(-90deg) translateZ(1px); }
+    .box-die .fold-up > .fold-down,
+    .box-die .fold-up ~ .fold-up.flap {
+      display: none; }
   .box-die .fold-down {
     left: 0;
     top: 100%;
     transform: rotateX(90deg);
     transform-origin: top; }
-    .box-die .fold-down > .fold-up {
-      display: none; }
+    .box-die .fold-down.flap,
+    .box-die .fold-down .side {
+      background-position: top center; }
     .box-die .fold-down.flap {
       transform: rotateX(90deg) translateZ(1px); }
+    .box-die .fold-down > .fold-up,
+    .box-die .fold-down ~ .fold-down.flap {
+      display: none; }
   .box-die.open, .box-die.open * {
     transform: rotateX(0) rotateY(0) translateZ(0) !important; }
-  .box-die.open .fold-left, .box-die.open .fold-left > .side {
-    border-right-width: 0px; }
-  .box-die.open .fold-right, .box-die.open .fold-right > .side {
-    border-left-width: 0px; }
-  .box-die.open .fold-up, .box-die.open .fold-up > .side {
-    border-bottom-width: 0px; }
-  .box-die.open .fold-down, .box-die.open .fold-down > .side {
-    border-top-width: 0px; }
-  .box-die.open .flap, .box-die:not(.open) *:not(.flap) {
+  .box-die:not(.open) .fold-left,
+  .box-die:not(.open) .fold-right,
+  .box-die:not(.open) .fold-up,
+  .box-die:not(.open) .fold-down {
+    margin: 0 !important; }
+  .box-die.open .flap, .box-die.open .inside, .box-die:not(.open) *:not(.flap):not(.inside) {
     transition-delay: 0.1s; }
 
 .perspective {
-  margin: 400px;
-  perspective: 800px; }
+  margin: 200px;
+  perspective: 600px; }
 
 .box-die {
-  width: 100px;
+  width: 200px;
   height: 200px; }
   .box-die .side,
   .box-die .flap {
-    width: 100px;
+    border-color: black;
+    background-color: rgba(0, 0, 0, 0.2);
+    width: 200px;
     height: 200px;
-    border-color: orange;
-    background: rgba(255, 255, 255, 0.8); }
-  .box-die .fold-left.flap {
-    width: 25px;
-    border-radius: 12.5px 0 0 12.5px; }
-  .box-die .fold-right.flap {
-    width: 25px;
-    border-radius: 0 12.5px 12.5px 0; }
-  .box-die .fold-up.flap {
-    height: 50px;
-    border-radius: 25px 25px 0 0; }
-  .box-die .fold-down.flap {
-    height: 50px;
-    border-radius: 0 0 25px 25px; }
+    border-width: 3px; }
+  .box-die .fold-left {
+    margin-right: -3px; }
+    .box-die .fold-left.flap {
+      width: 50px;
+      border-radius: 50px 0 0 50px; }
+  .box-die .fold-right {
+    margin-left: -3px; }
+    .box-die .fold-right.flap {
+      width: 50px;
+      border-radius: 0 50px 50px 0; }
+  .box-die .fold-up {
+    margin-bottom: -3px; }
+    .box-die .fold-up.flap {
+      height: 50px;
+      border-radius: 50px 50px 0 0; }
+  .box-die .fold-down {
+    margin-top: -3px; }
+    .box-die .fold-down.flap {
+      height: 50px;
+      border-radius: 0 0 50px 50px; }
   .box-die > .fold-up > .side,
   .box-die > .fold-up > .fold-up > .fold-up > .side,
   .box-die > .fold-up > .fold-down > .fold-down > .side,
   .box-die > .fold-down > .side,
   .box-die > .fold-down > .fold-up > .fold-up > .side,
   .box-die > .fold-down > .fold-down > .fold-down > .side {
-    width: 100px;
-    height: 300px; }
+    width: 200px;
+    height: 200px; }
   .box-die > .fold-up > .fold-left > .side,
   .box-die > .fold-up > .fold-right > .side,
   .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .side,
@@ -128,7 +160,7 @@
   .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .side,
   .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .side {
     width: 200px;
-    height: 300px; }
+    height: 200px; }
   .box-die > .fold-up > .fold-left.flap,
   .box-die > .fold-up > .fold-right.flap,
   .box-die > .fold-up > .fold-up > .fold-up > .fold-left.flap,
@@ -142,7 +174,7 @@
   .box-die > .fold-down > .fold-down > .fold-down > .fold-left.flap,
   .box-die > .fold-down > .fold-down > .fold-down > .fold-right.flap {
     width: 50px;
-    height: 300px; }
+    height: 200px; }
   .box-die > .fold-up > .fold-left > .fold-up > .side,
   .box-die > .fold-up > .fold-left > .fold-down > .side,
   .box-die > .fold-up > .fold-right > .fold-up > .side,
@@ -168,7 +200,7 @@
   .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-up > .side,
   .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-down > .side {
     width: 200px;
-    height: 100px; }
+    height: 200px; }
   .box-die > .fold-up > .fold-left > .fold-up.flap,
   .box-die > .fold-up > .fold-left > .fold-down.flap,
   .box-die > .fold-up > .fold-right > .fold-up.flap,
@@ -194,14 +226,14 @@
   .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-up.flap,
   .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-down.flap {
     width: 200px;
-    height: 25px; }
+    height: 50px; }
   .box-die > .fold-left > .side,
   .box-die > .fold-left > .fold-left > .fold-left > .side,
   .box-die > .fold-left > .fold-right > .fold-right > .side,
   .box-die > .fold-right > .side,
   .box-die > .fold-right > .fold-left > .fold-left > .side,
   .box-die > .fold-right > .fold-right > .fold-right > .side {
-    width: 300px;
+    width: 200px;
     height: 200px; }
   .box-die > .fold-left > .fold-up > .side,
   .box-die > .fold-left > .fold-down > .side,
@@ -215,8 +247,8 @@
   .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .side,
   .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .side,
   .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .side {
-    width: 300px;
-    height: 100px; }
+    width: 200px;
+    height: 200px; }
   .box-die > .fold-left > .fold-up.flap,
   .box-die > .fold-left > .fold-down.flap,
   .box-die > .fold-left > .fold-left > .fold-left > .fold-up.flap,
@@ -229,8 +261,8 @@
   .box-die > .fold-right > .fold-left > .fold-left > .fold-down.flap,
   .box-die > .fold-right > .fold-right > .fold-right > .fold-up.flap,
   .box-die > .fold-right > .fold-right > .fold-right > .fold-down.flap {
-    width: 300px;
-    height: 25px; }
+    width: 200px;
+    height: 50px; }
   .box-die > .fold-left > .fold-up > .fold-left > .side,
   .box-die > .fold-left > .fold-up > .fold-right > .side,
   .box-die > .fold-left > .fold-down > .fold-left > .side,
@@ -256,7 +288,7 @@
   .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-left > .side,
   .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-right > .side {
     width: 200px;
-    height: 100px; }
+    height: 200px; }
   .box-die > .fold-left > .fold-up > .fold-left.flap,
   .box-die > .fold-left > .fold-up > .fold-right.flap,
   .box-die > .fold-left > .fold-down > .fold-left.flap,
@@ -282,6 +314,216 @@
   .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-left.flap,
   .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-right.flap {
     width: 50px;
-    height: 100px; }
+    height: 200px; }
+
+#box-1 .perspective {
+  margin: 266.66667px;
+  perspective: 800px; }
+#box-1 .box-die {
+  width: 150px;
+  height: 250px; }
+  #box-1 .box-die .side,
+  #box-1 .box-die .flap {
+    border-color: orange;
+    background-color: transparent;
+    width: 150px;
+    height: 250px;
+    border-width: 3px; }
+  #box-1 .box-die .fold-left {
+    margin-right: -3px; }
+    #box-1 .box-die .fold-left.flap {
+      width: 12.5px;
+      border-radius: 12px 0 0 12px; }
+  #box-1 .box-die .fold-right {
+    margin-left: -3px; }
+    #box-1 .box-die .fold-right.flap {
+      width: 12.5px;
+      border-radius: 0 12px 12px 0; }
+  #box-1 .box-die .fold-up {
+    margin-bottom: -3px; }
+    #box-1 .box-die .fold-up.flap {
+      height: 12.5px;
+      border-radius: 12px 12px 0 0; }
+  #box-1 .box-die .fold-down {
+    margin-top: -3px; }
+    #box-1 .box-die .fold-down.flap {
+      height: 12.5px;
+      border-radius: 0 0 12px 12px; }
+  #box-1 .box-die > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .side {
+    width: 150px;
+    height: 50px; }
+  #box-1 .box-die > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .side {
+    width: 250px;
+    height: 50px; }
+  #box-1 .box-die > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-right.flap {
+    width: 62.5px;
+    height: 50px; }
+  #box-1 .box-die > .fold-up > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-up > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-down > .side {
+    width: 250px;
+    height: 150px; }
+  #box-1 .box-die > .fold-up > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-up > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-up > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-up > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-up > .fold-up > .fold-up > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-up > .fold-down > .fold-down > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-down > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-down > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-down > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-down > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-down > .fold-up > .fold-up > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-down > .fold-down > .fold-down > .fold-right > .fold-down.flap {
+    width: 250px;
+    height: 37.5px; }
+  #box-1 .box-die > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .side {
+    width: 50px;
+    height: 250px; }
+  #box-1 .box-die > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-right > .fold-down > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-up > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .side {
+    width: 50px;
+    height: 150px; }
+  #box-1 .box-die > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-right > .fold-down.flap,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-up.flap,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-down.flap,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-up.flap,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-down.flap {
+    width: 50px;
+    height: 37.5px; }
+  #box-1 .box-die > .fold-left > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-left > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .fold-right > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-left > .side,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-right > .side {
+    width: 250px;
+    height: 150px; }
+  #box-1 .box-die > .fold-left > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-left > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-left > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-left > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-left > .fold-left > .fold-left > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-left > .fold-right > .fold-right > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-right > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-right > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-right > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-right > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-right > .fold-left > .fold-left > .fold-down > .fold-right.flap,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .fold-left.flap,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-up > .fold-right.flap,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-left.flap,
+  #box-1 .box-die > .fold-right > .fold-right > .fold-right > .fold-down > .fold-right.flap {
+    width: 62.5px;
+    height: 150px; }
 
 /*# sourceMappingURL=box.css.map */

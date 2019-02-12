@@ -1,24 +1,40 @@
 /**
- * Mixin for creating a 3D box shape using css.
+ * Styles and mixin for creating a 3D box shape using css.
  * 
  * - .box-die should be the base element and have exactly one .side element.
  * - The .box-die element can be given the class .open to flatten the image.
  * - The .box-die element can also appear within a .perspective wrapper element.
- * - The .box-die can have up to one of each of the four .*-fold elements.
- * - Each .*-fold element should also have the class .flap, or it should contain
- * exactly one .side element and at most one of each .*-fold element.
- * - Each .flap element should also be one of the .*-fold elements.
- * - .flap and .side elements should not have any children with the box classes.
+ * - The .box-die can have up to one of each of the four .fold-* elements.
+ * - Each .fold-* element should also have the class .flap, or it should contain
+ * exactly one .side element and at most one of each .fold-* element.
+ * - Each .flap element should also be one of the .fold-* elements.
+ * - .flap and .side element should not have any children with the box classes.
  * - .fold-left should not contain a .fold-right child and visa versa. The same
  * is also true for .fold-up and .fold-down. Direct descendents will be hidden.
- * - It is expected that the box will be at most four *.-fold elements deep, not
+ * - It is expected that the box will be at most four .fold-* elements deep, not
  * including the flaps, and that it will contain only one or two small branches.
  * This is so that the box dimensions will be automatically calculated per side.
+ * - There should not be any overlap when created correctly, however, put .flap
+ * elements further down in the hierarchy to prevent issues with overlap.
  */
-@mixin box-die($box-width: 200px, $box-height: $box-width, $box-depth: $box-width, $egde-color: orange, $side-color: rgba(255,255,255,0.8), $perspective: $box-height * 4) {
+
+/**
+ * Mixin: box-die
+ * Automatically calculate the sizes necessary for the sides to fit together.
+ */
+@mixin box-die(
+    $box-width: 200px,       // Width of the box face, i.e. when open.
+    $box-height: $box-width, // Height of the box face. Default: $box-width.
+    $box-depth: $box-width,  // Depth of the box.       Default: $box-width.
+    $egde-color: black,           // Color of edges.  Default: Black.
+    $side-color: rgba(0,0,0,0.2), // Colour of sides. Default: Transparent Black.
+    $perspective: max($box-width, $box-height, $box-depth) * 3, // Includes a margin and perspactive. Default: 3x the biggest dimension.
+    $border-radius: min($box-width, $box-height, $box-depth) / 4, // Border radius of flaps. Default: 1/4 of the smallest dimension.
+    $edge-width: 3px
+) {
     // Perspective
     .perspective {
-        margin: $perspective / 2;
+        margin: $perspective / 3;
         perspective: $perspective;
     }
     .box-die {
@@ -26,35 +42,40 @@
         height: $box-height;
         .side,
         .flap {
+            border-color: $egde-color;
+            background-color: $side-color;
             // Standard box side and flap dimensions
             // Set the width and height on the divs themselves in order to change the shape.
             width: $box-width;
             height: $box-height;
-            border-color: $egde-color;
-            background: $side-color
+            border-width: $edge-width;
         }
         .fold-left {
+            margin-right: -$edge-width;
             &.flap {
-                width: $box-width / 4;
-                border-radius: ($box-width / 8) 0 0 ($box-width / 8);
+                width: $box-depth / 4;
+                border-radius: $border-radius 0 0 $border-radius;
             }
         }
         .fold-right {
+            margin-left: -$edge-width;
             &.flap {
-                width: $box-width / 4;
-                border-radius: 0 ($box-width / 8) ($box-width / 8) 0;
+                width: $box-depth / 4;
+                border-radius: 0 $border-radius $border-radius 0;
             }
         }
         .fold-up {
+            margin-bottom: -$edge-width;
             &.flap {
-                height: $box-height / 4;
-                border-radius: ($box-height / 8) ($box-height / 8) 0 0;
+                height: $box-depth / 4;
+                border-radius: $border-radius $border-radius 0 0;
             }
         }
         .fold-down {
+            margin-top: -$edge-width;
             &.flap {
-                height: $box-height / 4;
-                border-radius: 0 0 ($box-height / 8) ($box-height / 8);
+                height: $box-depth / 4;
+                border-radius: 0 0 $border-radius $border-radius;
             }
         }
         // Nested sides and flaps will need different dimensions based on their orientation.
@@ -144,8 +165,15 @@
     .flap {
         // Standard box side and flap dimensions
         // Set the width and height on the divs themselves in order to change the shape.
-        border-width: 3px;
         border-style: solid;
+        background-position: center center;
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+    .inside {
+        .side {
+            transform: translateZ(1px);
+        }
     }
     .fold-left,
     .fold-right,
@@ -154,15 +182,22 @@
         position: absolute;
     }
     .fold-left {
+        // Standard position and orientation when closed.
         top: 0;
         right: 100%;
         transform: rotateY(90deg);
         transform-origin: right;
-        > .fold-right {
-            display: none;
+        &.flap,
+        .side {
+            background-position: right center;
         }
         &.flap {
             transform: rotateY(90deg) translateZ(1px);
+        }
+        // Hide reverse left<>right fold elements and duplicate flap elements along the same fold line.
+        > .fold-right,
+        ~ .fold-left.flap {
+            display: none;
         }
     }
     .fold-right {
@@ -170,11 +205,16 @@
         left: 100%;
         transform: rotateY(-90deg);
         transform-origin: left;
-        > .fold-left {
-            display: none;
+        &.flap,
+        .side {
+            background-position: left center;
         }
         &.flap {
             transform: rotateY(-90deg) translateZ(1px);
+        }
+        > .fold-left,
+        ~ .fold-right.flap {
+            display: none;
         }
     }
     .fold-up {
@@ -182,11 +222,16 @@
         bottom: 100%;
         transform: rotateX(-90deg);
         transform-origin: bottom;
-        > .fold-down {
-            display: none;
+        &.flap,
+        .side {
+            background-position: bottom center;
         }
         &.flap {
             transform: rotateX(-90deg) translateZ(1px);
+        }
+        > .fold-down,
+        ~ .fold-up.flap {
+            display: none;
         }
     }
     .fold-down {
@@ -194,11 +239,16 @@
         top: 100%;
         transform: rotateX(90deg);
         transform-origin: top;
-        > .fold-up {
-            display: none;
+        &.flap,
+        .side {
+            background-position: top center;
         }
         &.flap {
             transform: rotateX(90deg) translateZ(1px);
+        }
+        > .fold-up,
+        ~ .fold-down.flap {
+            display: none;
         }
     }
     &.open {
@@ -206,44 +256,40 @@
             // Reset rotations and translations when displaying an open / flat box
             transform: rotateX(0) rotateY(0) translateZ(0) ! important;
         }
-        // Remove folded border to prevent double-ups when open.
-        .fold-left {
-            &, > .side {
-                border-right-width: 0px;
-            }
-        }
-        .fold-right {
-            &, > .side {
-                border-left-width: 0px;
-            }
-        }
-        .fold-up {
-            &, > .side {
-                border-bottom-width: 0px;
-            }
-        }
+    }
+    // Remove folded border to prevent double-ups when open.
+    &:not(.open) {
+        .fold-left,
+        .fold-right,
+        .fold-up,
         .fold-down {
-            &, > .side {
-                border-top-width: 0px;
-            }
+            margin: 0 ! important;
         }
     }
     &.open .flap,
-    &:not(.open) *:not(.flap) {
+    &.open .inside,
+    &:not(.open) *:not(.flap):not(.inside) {
         // Transition delay to the flaps when opening and delay all other faces when closing.
         transition-delay: 0.1s;
     }
 }
 
+// Include standard Mixin (cube at 200x200x200px with black lines and faces)
+@include box-die();
+
 // Box dimensions.
-$box-width: 100px;
-$box-height: 200px;
-$box-depth: 300px;
+$box-width: 150px;
+$box-height: 250px;
+$box-depth: 50px;
 // Orange outline with semi-transparent sides
 $egde-color: orange;
-$side-color: rgba(255,255,255,0.8);
-// Perspective
+$side-color: transparent; // rgba(255,255,255,0.8);
+// Additional variables
 $perspective: 800px;
+$border-radius: 12px;
+$edge-width: 3px;
 
-// Include Mixin
-@include box-die($box-width, $box-height, $box-depth, $egde-color, $side-color, $perspective);
+// Use IDs for boxes.
+#box-1 {
+    @include box-die($box-width, $box-height, $box-depth, $egde-color, $side-color, $perspective, $border-radius, $edge-width);
+}
